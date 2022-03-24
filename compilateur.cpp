@@ -32,8 +32,9 @@ void ReadChar(void) {
 	if(NLookedAhead > 0) { // If char has already been read
 		current = lookedAhead;
 		NLookedAhead -= 1;
+	} else {
+		while(cin.get(current) && (current==' '||current=='\t'||current=='\n'));
 	}
-	while(cin.get(current) && (current==' '||current=='\t'||current=='\n'));
 }
 
 void LookAhead(void) {
@@ -46,23 +47,28 @@ void Error(string s){
 	exit(-1);
 }
 
-// Program := [DeclarationPart] StatementPart
-// DeclarationPart := "[" Letter {"," Letter} "]"
-// StatementPart := Statement {";" Statement} "."
-// Statement := AssignementStatement
-// AssignementStatement := Letter "=" Expression
 
-// Expression := SimpleExpression [RelationalOperator SimpleExpression]
-// SimpleExpression := Term {AdditiveOperator Term}
-// Term := Factor {MultiplicativeOperator Factor}
-// Factor := Number | Letter | "(" Expression ")"| "!" Factor
-// Number := Digit{Digit}
+char[] letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+char[] digits = ['0','1','2','3','4','5','6','7','8','9'];
 
-// AdditiveOperator := "+" | "-" | "||"
-// MultiplicativeOperator := "*" | "/" | "%" | "&&"
-// RelationalOperator := "==" | "!=" | "<" | ">" | "<=" | ">="  
-// Digit := "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
-// Letter := "a"|...|"z"
+// Vérifications
+bool isDigit(char s) {
+	for(int i = 0; i < 10; i ++) {
+		if(s == digits[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+bool isLetter(char s) {
+	for(int i = 0; i < 26; i ++) {
+		if(s == letters[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
 
 
 // Prototypage entier
@@ -87,22 +93,122 @@ void Letter(void);
 
 // Ecriture
 
+// Program := [DeclarationPart] StatementPart
 void Program(void) {
-	
+	if(current == '[') {
+		DeclarationPart();
+	}
+	StatementPart();
+	ReadChar();
 }
 
-void Expression(void) {
-	ArithmeticExpression();
+// DeclarationPart := "[" Letter {"," Letter} "]"
+void DeclarationPart(void) {
+	if(current != '[') {
+		Error("Mot clé '[' attendu.");
+	}
 	ReadChar();
+	Letter();
+	while(current == ',') {
+		ReadChar();
+		Letter();
+	}
+	if(current != ']') {
+		Error("Mot clé ']' attendu.");
+	}
+	ReadChar();
+}
+
+// StatementPart := Statement {";" Statement} "."
+void StatementPart(void) {
+	Statement();
+	while(current == ';') {
+		ReadChar();
+		Statement();
+	}
+	if(current != '.') {
+		Error("Mot clé '.' attendu.");
+	}
+	ReadChar();
+}
+
+// Statement := AssignementStatement
+void Statement(void) {
+	AssignementStatement();
+	ReadChar();
+}
+
+// AssignementStatement := Letter "=" Expression
+void AssignementStatement(void) {
+	Letter();
+	if(current != '=') {
+		Error("Mot clé '=' attendu.");
+	}
+	ReadChar();
+	Expression();
+}
+
+// Expression := SimpleExpression [RelationalOperator SimpleExpression]
+void Expression(void) {
+	SimpleExpression();
 	if(current=='='||current=='>'||current=='<') {
 		RelationnalOperator();
-		ArithmeticExpression();
-
+		SimpleExpression();
 	}
 }
 
+// SimpleExpression := Term {AdditiveOperator Term}
+void SimpleExpression(void) {
+	Term();
+	while(current=='+'||current=='-'||current='|') {
+		AdditiveOperator();
+		Term();
+	}
+}
+
+// Term := Factor {MultiplicativeOperator Factor}
+void Term(void) {
+	Factor();
+	while(current=="*"||current=="/"||current=="%"||current=="&") {
+		MultiplicativeOperator();
+		Factor();
+	}
+}
+
+// Factor := Number | Letter | "(" Expression ")"| "!" Factor
+void Factor(void) {
+	if(isDigit(current)) {
+		Number();
+	} else if(isLetter(current)) {
+		Letter();
+	} else if(current=='(') {
+		ReadChar();
+		Expression();
+		if(current!=')') {
+			Error("Mot clé ')' attendu");
+		}
+		ReadChar();
+	} else if(current == '!') {
+		ReadChar();
+		Factor();
+	} else {
+		Error("Facteur attendu");
+	}
+}
+
+// Number := Digit{Digit}
+
+
+// AdditiveOperator := "+" | "-" | "||"
+// MultiplicativeOperator := "*" | "/" | "%" | "&&"
+// RelationalOperator := "==" | "!=" | "<" | ">" | "<=" | ">="  
+// Digit := "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
+// Letter := "a"|...|"z"
+
+
+
 void AdditiveOperator(void){
-	if(current=='+'||current=='-')
+	if(current=='+'||current=='-'||"|")
 		ReadChar();
 	else
 		Error("Opérateur additif attendu");	   // Additive operator expected
