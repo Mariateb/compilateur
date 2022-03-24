@@ -34,6 +34,7 @@ void ReadChar(void) {
 		NLookedAhead -= 1;
 	} else {
 		while(cin.get(current) && (current==' '||current=='\t'||current=='\n'));
+		cout << "JE LIS : " << current << endl;
 	}
 }
 
@@ -46,30 +47,6 @@ void Error(string s){
 	cerr<< s << endl;
 	exit(-1);
 }
-
-
-char[] letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
-char[] digits = ['0','1','2','3','4','5','6','7','8','9'];
-
-// Vérifications
-bool isDigit(char s) {
-	for(int i = 0; i < 10; i ++) {
-		if(s == digits[i]) {
-			return true;
-		}
-	}
-	return false;
-}
-bool isLetter(char s) {
-	for(int i = 0; i < 26; i ++) {
-		if(s == letters[i]) {
-			return true;
-		}
-	}
-	return false;
-}
-
-
 
 // Prototypage entier
 
@@ -95,6 +72,7 @@ void Letter(void);
 
 // Program := [DeclarationPart] StatementPart
 void Program(void) {
+	cout << "PROGRAM" << endl;
 	if(current == '[') {
 		DeclarationPart();
 	}
@@ -104,6 +82,7 @@ void Program(void) {
 
 // DeclarationPart := "[" Letter {"," Letter} "]"
 void DeclarationPart(void) {
+	cout << "DECLARATION PART" << endl;
 	if(current != '[') {
 		Error("Mot clé '[' attendu.");
 	}
@@ -121,46 +100,54 @@ void DeclarationPart(void) {
 
 // StatementPart := Statement {";" Statement} "."
 void StatementPart(void) {
+	cout << "STATEMENT PART" << endl;
 	Statement();
 	while(current == ';') {
 		ReadChar();
 		Statement();
 	}
+	cout << "JE VAIS CHECK" << endl;
 	if(current != '.') {
 		Error("Mot clé '.' attendu.");
 	}
+	cout << "END OF STATEMENT PART" << endl;
 	ReadChar();
 }
 
 // Statement := AssignementStatement
 void Statement(void) {
+	cout << "STATEMENT" << endl;
 	AssignementStatement();
-	ReadChar();
 }
 
 // AssignementStatement := Letter "=" Expression
 void AssignementStatement(void) {
+	cout << "ASSIGNMENT STATEMENT" << endl;
 	Letter();
 	if(current != '=') {
 		Error("Mot clé '=' attendu.");
 	}
 	ReadChar();
 	Expression();
+	cout << "END OF ASSIGNMENT STATEMENT" << endl;
 }
 
 // Expression := SimpleExpression [RelationalOperator SimpleExpression]
 void Expression(void) {
+	cout << "EXPRESSION" << endl;
 	SimpleExpression();
 	if(current=='='||current=='>'||current=='<') {
-		RelationnalOperator();
+		RelationalOperator();
 		SimpleExpression();
 	}
+	cout << "END OF EXPRESSION" << endl;
 }
 
 // SimpleExpression := Term {AdditiveOperator Term}
 void SimpleExpression(void) {
+	cout << "SIMPLE EXPRESSION" << endl;
 	Term();
-	while(current=='+'||current=='-'||current='|') {
+	while(current=='+'||current=='-'||current=='|') {
 		AdditiveOperator();
 		Term();
 	}
@@ -168,8 +155,9 @@ void SimpleExpression(void) {
 
 // Term := Factor {MultiplicativeOperator Factor}
 void Term(void) {
+	cout << "TERM" << endl;
 	Factor();
-	while(current=="*"||current=="/"||current=="%"||current=="&") {
+	while(current=='*'||current=='/'||current=='%'||current=='&') {
 		MultiplicativeOperator();
 		Factor();
 	}
@@ -177,9 +165,10 @@ void Term(void) {
 
 // Factor := Number | Letter | "(" Expression ")"| "!" Factor
 void Factor(void) {
-	if(isDigit(current)) {
+	cout << "FACTOR" << endl;
+	if(isdigit(current)) {
 		Number();
-	} else if(isLetter(current)) {
+	} else if(isalpha(current)) {
 		Letter();
 	} else if(current=='(') {
 		ReadChar();
@@ -197,24 +186,54 @@ void Factor(void) {
 }
 
 // Number := Digit{Digit}
-
+void Number(void) {
+	cout << "NUMBER" << endl;
+	Digit();
+	while(isdigit(current)) {
+		Digit();
+	}
+}
 
 // AdditiveOperator := "+" | "-" | "||"
-// MultiplicativeOperator := "*" | "/" | "%" | "&&"
-// RelationalOperator := "==" | "!=" | "<" | ">" | "<=" | ">="  
-// Digit := "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
-// Letter := "a"|...|"z"
-
-
-
-void AdditiveOperator(void){
-	if(current=='+'||current=='-'||"|")
+void AdditiveOperator(void) {
+	cout << "ADDITIVE OPERATOR" << endl;
+	if(current=='+'||current=='-') {
 		ReadChar();
-	else
-		Error("Opérateur additif attendu");	   // Additive operator expected
+	} else if(current=='|') {
+		LookAhead();
+		cout << "YOOOOO" << endl;
+		if(lookedAhead == '|') {
+			cout << "hahaheaaehae" << endl;
+			ReadChar();
+		}
+	} else {
+		Error("Opérateur additif attendu");
+	}
 }
-		
+
+// MultiplicativeOperator := "*" | "/" | "%" | "&&"
+void MultiplicativeOperator(void) {
+	cout << "MULTIPLICATIVE OPERATOR" << endl;
+	if(current=='*'||current=='/'||current=='%'||current=='&') {
+		ReadChar();
+	} else {
+		Error("Opérateur multiplicatif attendu");
+	}
+}
+
+// RelationalOperator := "==" | "!=" | "<" | ">" | "<=" | ">="
+void RelationalOperator(void) {
+	cout << "RELATIONAL OPERATOR" << endl;
+	if(current=='='||current=='!'||current=='<'||current=='>') {
+		ReadChar();
+	} else {
+		Error("Opérateur relationnel attendu");
+	}
+}
+
+// Digit := "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
 void Digit(void){
+	cout << "DIGIT" << endl;
 	if((current<'0')||(current>'9'))
 		Error("Chiffre attendu");		   // Digit expected
 	else{
@@ -223,39 +242,16 @@ void Digit(void){
 	}
 }
 
-void Term(void){
-	if(current=='('){
+// Letter := "a"|...|"z"
+void Letter(void) {
+	cout << "LETTER" << endl;
+	if(current >= 'a' && current <= 'z') {
 		ReadChar();
-		ArithmeticExpression();
-		if(current!=')')
-			Error("')' était attendu");		// ")" expected
-		else
-			ReadChar();
+	} else {
+		Error("Lettre attendue.");
 	}
-	else 
-		if (current>='0' && current <='9')
-			Digit();
-	     	else
-			Error("'(' ou chiffre attendu");
 }
 
-void ArithmeticExpression(void){
-	char adop;
-	Term();
-	while(current=='+'||current=='-'){
-		adop=current;		// Save operator in local variable
-		AdditiveOperator();
-		Term();
-		cout << "\tpop %rbx"<<endl;	// get first operand
-		cout << "\tpop %rax"<<endl;	// get second operand
-		if(adop=='+')
-			cout << "\taddq	%rbx, %rax"<<endl;	// add both operands
-		else
-			cout << "\tsubq	%rbx, %rax"<<endl;	// substract both operands
-		cout << "\tpush %rax"<<endl;			// store result
-	}
-
-}
 
 int main(void){	// First version : Source code on standard input and assembly code on standard output
 	// Header for gcc assembler / linker
@@ -267,7 +263,7 @@ int main(void){	// First version : Source code on standard input and assembly co
 
 	// Let's proceed to the analysis and code production
 	ReadChar();
-	ArithmeticExpression();
+	Program();
 	ReadChar();
 	// Trailer for the gcc assembler / linker
 	cout << "\tmovq %rbp, %rsp\t\t# Restore the position of the stack's top"<<endl;
