@@ -25,11 +25,20 @@
 using namespace std;
 
 char current;				// Current car	
+char lookedAhead;			// Looked ahead
+int NLookedAhead = 0;
 
-void ReadChar(void){		// Read character and skip spaces until 
-				// non space character is read
-	while(cin.get(current) && (current==' '||current=='\t'||current=='\n'))
-	   	cin.get(current);
+void ReadChar(void) {	
+	if(NLookedAhead > 0) { // If char has already been read
+		current = lookedAhead;
+		NLookedAhead -= 1;
+	}
+	while(cin.get(current) && (current==' '||current=='\t'||current=='\n'));
+}
+
+void LookAhead(void) {
+	while(cin.get(current) && (current==' '||current=='\t'||current=='\n'));
+	NLookedAhead += 1;
 }
 
 void Error(string s){
@@ -37,12 +46,61 @@ void Error(string s){
 	exit(-1);
 }
 
-// ArithmeticExpression := Term {AdditiveOperator Term}
-// Term := Digit | "(" ArithmeticExpression ")"
-// AdditiveOperator := "+" | "-"
-// Digit := "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
+// Program := [DeclarationPart] StatementPart
+// DeclarationPart := "[" Letter {"," Letter} "]"
+// StatementPart := Statement {";" Statement} "."
+// Statement := AssignementStatement
+// AssignementStatement := Letter "=" Expression
 
+// Expression := SimpleExpression [RelationalOperator SimpleExpression]
+// SimpleExpression := Term {AdditiveOperator Term}
+// Term := Factor {MultiplicativeOperator Factor}
+// Factor := Number | Letter | "(" Expression ")"| "!" Factor
+// Number := Digit{Digit}
+
+// AdditiveOperator := "+" | "-" | "||"
+// MultiplicativeOperator := "*" | "/" | "%" | "&&"
+// RelationalOperator := "==" | "!=" | "<" | ">" | "<=" | ">="  
+// Digit := "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
+// Letter := "a"|...|"z"
+
+
+// Prototypage entier
+
+void Program(void);
+void DeclarationPart(void);
+void StatementPart(void);
+void Statement(void);
+void AssignementStatement(void);
+
+void Expression(void);
+void SimpleExpression(void);
+void Term(void);
+void Factor(void);
+void Number(void);
+
+void AdditiveOperator(void);
+void MultiplicativeOperator(void);
+void RelationalOperator(void);
+void Digit(void);
+void Letter(void);
+
+// Ecriture
+
+void Program(void) {
 	
+}
+
+void Expression(void) {
+	ArithmeticExpression();
+	ReadChar();
+	if(current=='='||current=='>'||current=='<') {
+		RelationnalOperator();
+		ArithmeticExpression();
+
+	}
+}
+
 void AdditiveOperator(void){
 	if(current=='+'||current=='-')
 		ReadChar();
@@ -58,8 +116,6 @@ void Digit(void){
 		ReadChar();
 	}
 }
-
-void ArithmeticExpression(void);			// Called by Term() and calls Term()
 
 void Term(void){
 	if(current=='('){
